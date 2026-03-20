@@ -47,7 +47,8 @@ rust_psm_replace_stack:
 /* extern "C" fn(r2: usize, r3: extern "C" fn(usize), r4: *mut u8) */
 .cfi_startproc
     /* FIXME: backtrace does not terminate cleanly for some reason */
-    lay %r15, -160(%r4)
+    lgr %r15, %r4
+    aghi %r15, -160
     /* FIXME: this is `basr` instead of `br` purely to remove the backtrace link to the caller */
     basr %r14, %r3
 .rust_psm_replace_stack_end:
@@ -61,8 +62,10 @@ rust_psm_replace_stack:
 rust_psm_on_stack:
 /* extern "C" fn(r2: usize, r3: usize, r4: extern "C" fn(usize, usize), r5: *mut u8) */
 .cfi_startproc
-    stmg %r14, %r15, -16(%r5)
-    lay %r15, -176(%r5)
+    aghi %r5, -16
+    stmg %r14, %r15, 0(%r5)
+    lgr %r15, %r5
+    aghi %r15, -160
     .cfi_def_cfa %r15, 176
     .cfi_offset %r14, -16
     .cfi_offset %r15, -8
